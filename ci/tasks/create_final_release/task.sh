@@ -1,12 +1,12 @@
 #!/bin/bash
 set -eux
 
-version="$(cat zookeepeer_bosh_release_version/version)"
+version="$(cat zookeeper_bosh_release_version/version)"
 
 cat $version
 exit 1
 
-cd  zookeepeer_bosh_release/
+cd  zookeeper_bosh_release/
 
 git config --global user.name "Concourse CI Bot"
 git config --global user.email "ci@localhost"
@@ -28,4 +28,4 @@ fi
 
 cd ../
 
-git clone zookeepeer_bosh_release updated_zookeepeer_bosh_release
+git clone zookeeper_bosh_release updated_zookeeper_bosh_release
