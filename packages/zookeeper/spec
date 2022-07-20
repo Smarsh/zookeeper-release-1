@@ -1,5 +1,0 @@
----
-name: zookeeper
-
-files:
-- zookeeper/zookeeper.tar.gz

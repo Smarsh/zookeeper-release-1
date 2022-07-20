@@ -1,7 +1,3 @@
-# Zookeeper BOSH release
+# version branch
 
-```
-$ bosh -d zookeeper deploy manifests/zookeeper.yml
-$ bosh -d zookeeper run-errand smoke-tests
-$ bosh -d zookeeper run-errand status
-```
+This branch exists for release versioning purposes only. No humans should ever commit to this branch
