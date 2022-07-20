@@ -110,7 +110,7 @@ jobs:
       blob_dir: zookeeper_package
     params:
       << : *blobstore_credentials
-      BLOB_FILE: zookeeper-*.tar.gz
+      BLOB_FILE: zookeeper.tar.gz
       BLOB_PATH: zookeeper/zookeeper.tar.gz
   - put: zookeeper_bosh_release
     params:
