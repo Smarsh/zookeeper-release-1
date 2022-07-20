@@ -6,7 +6,7 @@ version="$(cat zookeepeer_bosh_release_version/version)"
 cat $version
 exit 1
 
-pushd zookeepeer_bosh_release/
+cd  zookeepeer_bosh_release/
 
 git config --global user.name "Concourse CI Bot"
 git config --global user.email "ci@localhost"
@@ -26,6 +26,6 @@ if ! [ -e "${RELEASE_YML}" ]; then
   git commit -m "final release v${version}"
 fi
 
-popd
+cd ../
 
 git clone zookeepeer_bosh_release updated_zookeepeer_bosh_release
