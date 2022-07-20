@@ -9,5 +9,5 @@ wget https://archive.apache.org/dist/zookeeper/zookeeper-3.4.10/zookeeper-3.4.10
 
 tar -xzvf zookeeper-3.4.10.tar.gz
 mv zookeeper-3.4.10 zookeeper
-tar -cvzf zookeeper.tar.gz zookeepeer
+tar -cvzf zookeeper.tar.gz zookeeper
 mv zookeeper.tar.gz zookeeper_package/zookeeper.tar.gz
