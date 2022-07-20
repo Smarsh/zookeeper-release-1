@@ -113,6 +113,7 @@ jobs:
       BLOB_FILE: zookeeper.tar.gz
       BLOB_PATH: zookeeper/zookeeper.tar.gz
   - put: zookeeper_bosh_release
+    inputs: [updated_zookeeper_bosh_release]
     params:
       repository: updated_zookeeper_bosh_release
       rebase: true
@@ -142,9 +143,11 @@ jobs:
     params:
       << : *blobstore_credentials
   - put: zookeeper_bosh_candidate_release_s3
+    inputs: [release_tarball]
     params:
       file: release_tarball/zookeeper-*.tgz
   - put: zookeeper_bosh_release_version
+    inputs: [zookeeper_bosh_release_version]
     params:
       file: zookeeper_bosh_release_version/version
 
@@ -190,6 +193,7 @@ jobs:
           name="zookeeper bosh release $version"
           echo "$name" > release_vars/name
   - put: zookeeper_bosh_release_github
+    inputs: [release_tarball]
     params:
      name: release_vars/name
      tag: zookeeper_bosh_release_version/version
@@ -197,12 +201,15 @@ jobs:
      globs:
      - release_tarball/zookeeper-*.tgz
   - put: zookeeper_bosh_release_s3
+    inputs: [release_tarball]
     params:
       file: release_tarball/zookeeper-*.tgz
   - put: updated_zookeeper_bosh_release
+    inputs: [updated_zookeeper_bosh_release]
     params:
       repository: updated_zookeeper_bosh_release
       rebase: true
   - put: zookeeper_bosh_release_version
+    inputs: [zookeeper_bosh_release_version]
     params:
       file: zookeeper_bosh_release_version/version
