@@ -1,0 +1,206 @@
+---
+anchors:
+  <<: &zookeeper_bosh_release_source
+    private_key: ((git-private-key))
+    uri: git@github.com:Smarsh/zookeeper-release.git
+    branch: master
+  <<: &docker_image_source
+    username: ((docker-hub-username))
+    password: ((docker-hub-password))
+  <<: &bosh_creds
+    BOSH_CA_CERT: |
+      ((bosh_ca_cert.certificate))
+    BOSH_CLIENT: ((bosh_username))
+    BOSH_CLIENT_SECRET: ((bosh_client_secret))
+    BOSH_ENVIRONMENT: ((bosh_director_ip))
+  <<: &smarsh_bosh_releases_bucket_source
+    bucket: smarsh-bosh-releases
+    access_key_id: ((smarsh_bosh_releases_user.access_key_id))
+    secret_access_key: ((smarsh_bosh_releases_user.secret_access_key))
+  <<: &blobstore_credentials
+    AWS_ACCESS_KEY_ID: ((smarsh_bosh_releases_user.access_key_id))
+    AWS_SECRET_ACCESS_KEY: ((smarsh_bosh_releases_user.secret_access_key))
+
+resource_types:
+- name: github-release
+  type: registry-image
+  source:
+    repository: concourse/github-release-resource
+    tag: latest
+    username: ((docker-hub-username))
+    password: ((docker-hub-password))
+
+
+resources:
+- name: delivery-ci-bosh-image
+  type: registry-image
+  source:
+    repository: smarshops/delivery-ci-bosh
+    <<: *docker_image_source
+
+- name: zookeeper_bosh_candidate_release_s3
+  type: s3
+  source:
+    << : *smarsh_bosh_releases_bucket_source
+    regexp: zookeeper/candidates/zookeeper-(.*).tgz
+
+- name: zookeeper_bosh_release_s3
+  type: s3
+  source:
+    << : *smarsh_bosh_releases_bucket_source
+    regexp: zookeeper/zookeeper-(.*).tgz
+
+- name: zookeeper_bosh_release
+  type: git
+  source:
+    ignore_paths:
+    - releases
+    - .final_builds
+    - README.md
+    << : *zookeeper_bosh_release_source
+
+- name: updated_zookeeper_bosh_release
+  type: git
+  source:
+    branch: master
+    << : *zookeeper_bosh_release_source
+
+- name: zookeeper_bosh_release_version
+  type: semver
+  source:
+    driver: git
+    branch: version
+    file: version
+    << : *zookeeper_bosh_release_source
+
+- name: zookeeper_bosh_release_github
+  type: github-release
+  source:
+   owner: Smarsh
+   repository: zookeeper-release
+   access_token: ((ea_github_ci_token))
+
+jobs:
+- name: set-pipeline
+  serial: true
+  plan:
+  - get: zookeeper_bosh_release
+    params:
+      depth: 1
+    trigger: true
+  - set_pipeline: zookeeper-bosh-release
+    file: zookeeper_bosh_release/ci/pipeline.yml
+
+- name: update_zookeeper_blob
+  serial: true
+  plan:
+  - get: delivery-ci-bosh-image
+  - get: zookeeper_bosh_release
+    passed:
+    - set-pipeline
+    params:
+      depth: 1
+  - task: update_zookeeper_package
+    file: zookeeper_bosh_release/ci/tasks/update_zookeeper_package/task.yml
+    image: delivery-ci-bosh-image
+  - task: update_blob
+    file: zookeeper_bosh_release/ci/tasks/add_blob.yml
+    input_mapping:
+      blob_dir: zookeeper_package
+    params:
+      << : *blobstore_credentials
+      BLOB_FILE: zookeeper-*.tar.gz
+      BLOB_PATH: zookeeper/zookeeper.tar.gz
+  - put: zookeeper_bosh_release
+    params:
+      repository: updated_zookeeper_bosh_release
+      rebase: true
+
+- name: create_candidate_release
+  serial: true
+  serial_groups:
+  - zookeeper_release
+  plan:
+  - get: zookeeper_bosh_release
+    passed:
+    - set-pipeline
+    params:
+      depth: 1
+    trigger: true
+  - get: zookeeper_bosh_release_version
+    params:
+      bump: patch
+      pre: rc
+  #will take it up as part of unit-testing
+  # - task: test_templating
+  #   file: zookeeper_bosh_release/ci/tasks/test_templating.yml
+  - task: create_release
+    file: zookeeper_bosh_release/ci/tasks/create_candidate_release/task.yml
+    image: delivery-ci-bosh-image
+    params:
+      << : *blobstore_credentials
+  - put: zookeeper_bosh_candidate_release_s3
+    params:
+      file: release_tarball/zookeeper-*.tgz
+  - put: zookeeper_bosh_release_version
+    params:
+      file: zookeeper_bosh_release_version/version
+
+- name: create_final_release
+  serial: true
+  serial_groups:
+  - zookeeper_release
+  plan:
+  - get: zookeeper_bosh_candidate_release_s3
+    passed:
+    - create_candidate_release
+    trigger: true
+  - get: zookeeper_bosh_release
+    params:
+      depth: 1
+    passed:
+    - create_candidate_release
+  - get: zookeeper_bosh_release_version
+    passed:
+    - create_candidate_release
+    params:
+      bump: final
+  - get: delivery-ci-bosh-image
+  - task: create_final_release
+    file: zookeeper_bosh_release/ci/tasks/create_final_release/task.yml
+    image: delivery-ci-bosh-image
+    params:
+      << : *blobstore_credentials
+  - task: write_github_release_vars
+    image: delivery-ci-bosh-image
+    config:
+      platform: linux
+      inputs:
+      - name: zookeeper_bosh_release_version
+      outputs:
+      - name: release_vars
+      run:
+        path: bash
+        args:
+        - -euxc
+        - |
+          version=$(cat zookeeper_bosh_release_version/version)
+          name="zookeeper bosh release $version"
+          echo "$name" > release_vars/name
+  - put: zookeeper_bosh_release_github
+    params:
+     name: release_vars/name
+     tag: zookeeper_bosh_release_version/version
+     commitish: zookeeper_bosh_release/.git/ref
+     globs:
+     - release_tarball/zookeeper-*.tgz
+  - put: zookeeper_bosh_release_s3
+    params:
+      file: release_tarball/zookeeper-*.tgz
+  - put: updated_zookeeper_bosh_release
+    params:
+      repository: updated_zookeeper_bosh_release
+      rebase: true
+  - put: zookeeper_bosh_release_version
+    params:
+      file: zookeeper_bosh_release_version/version

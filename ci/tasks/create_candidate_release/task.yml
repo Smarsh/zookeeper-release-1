@@ -1,0 +1,11 @@
+platform: linux
+
+inputs:
+- name: zookeeper_bosh_release
+
+outputs:
+- name: release_tarball
+
+run:
+  path: /bin/bash
+  args: ["zookeeper_bosh_release/ci/tasks/create_candidate_release/task.sh"]
