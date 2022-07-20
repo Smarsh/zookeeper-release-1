@@ -2,3 +2,7 @@ zookeeper/zookeeper-3.8.0.tar.gz:
   size: 13185104
   object_id: cda416c2-ba1c-4982-7b22-05c2e9916813
   sha: sha256:0b26adea71631989c3e2c08a30984edc5663aa912823b8d02e43c6a7d4e8128b
+zookeeper/zookeeper.tar.gz:
+  size: 35048345
+  object_id: dad89130-7774-44a9-4189-fc4b999207c9
+  sha: sha256:7bf9771ec73f6f0f00de1071194df7aad805822b64cacdf6da19fbec8706727c
