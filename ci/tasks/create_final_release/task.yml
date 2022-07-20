@@ -5,6 +5,7 @@ inputs:
 
 outputs:
 - name: release_tarball
+- name: updated_zookeeper_bosh_release
 
 run:
   path: /bin/bash
