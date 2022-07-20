@@ -104,7 +104,8 @@ jobs:
     file: zookeeper_bosh_release/ci/tasks/update_zookeeper_package/task.yml
     image: delivery-ci-bosh-image
   - task: update_blob
-    file: zookeeper_bosh_release/ci/tasks/add_blob.yml
+    file: zookeeper_bosh_release/ci/tasks/add_blob/task.yml
+    image: delivery-ci-bosh-image
     input_mapping:
       blob_dir: zookeeper_package
     params:

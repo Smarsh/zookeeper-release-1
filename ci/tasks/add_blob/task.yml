@@ -1,0 +1,8 @@
+platform: linux
+
+inputs:
+- name: zookeeper_bosh_release
+
+run:
+  path: /bin/bash
+  args: ["zookeeper_bosh_release/ci/tasks/add_blob/task.sh"]
