@@ -131,6 +131,7 @@ jobs:
     params:
       bump: patch
       pre: rc
+  - get: delivery-ci-bosh-image
   #will take it up as part of unit-testing
   # - task: test_templating
   #   file: zookeeper_bosh_release/ci/tasks/test_templating.yml
