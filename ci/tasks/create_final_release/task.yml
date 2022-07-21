@@ -3,6 +3,7 @@ platform: linux
 inputs:
 - name: zookeeper_bosh_release
 - name: zookeeper_bosh_release_version
+- name: zookeeper_bosh_candidate_release_s3
 
 outputs:
 - name: release_tarball
