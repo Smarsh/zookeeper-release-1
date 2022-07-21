@@ -5,7 +5,6 @@ blobs
 .blobs
 .dev_builds
 .idea
-.final_builds
 releases/**/*.tgz
 .DS_Store
 *.swp
