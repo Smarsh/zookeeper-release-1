@@ -1,5 +1,4 @@
 ---
-final_name: zookeeper
 blobstore:
   provider: s3
   options:
