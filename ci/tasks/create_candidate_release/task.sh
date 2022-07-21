@@ -6,4 +6,4 @@ cd zookeeper_bosh_release
 
 bosh create-release --force \
   --version "$version" \
-  --tarball "../release_tarball/zookeepeer-$version.tgz"
+  --tarball "../release_tarball/zookeeper-$version.tgz"
