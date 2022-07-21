@@ -193,7 +193,7 @@ jobs:
           name="zookeeper bosh release $version"
           echo "$name" > release_vars/name
   - put: zookeeper_bosh_release_github
-    inputs: [release_tarball,release_vars]
+    inputs: detect
     params:
      name: release_vars/name
      tag: zookeeper_bosh_release_version/version
