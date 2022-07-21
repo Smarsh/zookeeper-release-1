@@ -3,9 +3,6 @@ set -eux
 
 version="$(cat zookeeper_bosh_release_version/version)"
 
-cat $version
-exit 1
-
 cd  zookeeper_bosh_release/
 
 git config --global user.name "Concourse CI Bot"
