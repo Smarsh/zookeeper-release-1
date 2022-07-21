@@ -3,7 +3,6 @@ anchors:
   <<: &zookeeper_bosh_release_source
     private_key: ((git-private-key))
     uri: git@github.com:Smarsh/zookeeper-release.git
-    branch: master
   <<: &docker_image_source
     username: ((docker-hub-username))
     password: ((docker-hub-password))
@@ -58,6 +57,7 @@ resources:
     - .final_builds
     - README.md
     << : *zookeeper_bosh_release_source
+    branch: master
 
 - name: updated_zookeeper_bosh_release
   type: git
